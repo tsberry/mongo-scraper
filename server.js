@@ -10,31 +10,53 @@ var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines
 mongoose.Promise = Promise;
 mongoose.connect(MONGODB_URI);
 
+const Schema = mongoose.Schema,
+    ObjectId = Schema.ObjectId;
+
+const article = new Schema({
+    id: ObjectId,
+    title: String,
+    summary: String,
+    link: String
+});
+
+const Article = mongoose.model('Article', article);
+
 request("https://theguardian.com", function (error, response, html) {
     var $ = cheerio.load(html);
-    var results = [];
+    // var results = [];
     var links = [];
     $("a.fc-item__link").each(function (i, element) {
         links.push($(element).attr("href"));
     });
     console.log(links.length);
-    scrapeArticle(links, results, 0);
+    scrapeArticle(links, 0);
 });
 
-function scrapeArticle(links, results, i) {
+function scrapeArticle(links, i) {
     console.log(i);
-    if (i === links.length) console.log(results);
+    if (i === links.length) return;
     else {
-        request(links[i], function (error, response, html) {
-            var $ = cheerio.load(html);
-            var title = $("h1.content__headline").text();
-            var summary = $("div.content__standfirst").children("p").text();
-            results.push({
-                title: title,
-                summary: summary,
-                link: links[i]
-            });
-            scrapeArticle(links, results, i + 1);
+        Article.find({ link: links[i] }, function (error, docs) {
+            if (docs.length > 0) {
+                console.log("Article already in database!");
+                scrapeArticle(links, i + 1);
+            }
+            else {
+                request(links[i], function (error, response, html) {
+                    var $ = cheerio.load(html);
+                    var title = $("h1.content__headline").text();
+                    var summary = $("div.content__standfirst").children("p").text();
+                    var newArticle = Article();
+                    newArticle.title = title;
+                    newArticle.summary = summary;
+                    newArticle.link = links[i];
+                    newArticle.save(function (err) {
+                        if (!err) console.log("Success!");
+                    })
+                    scrapeArticle(links, i + 1);
+                });
+            }
         });
     }
 }
