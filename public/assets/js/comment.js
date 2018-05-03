@@ -12,8 +12,4 @@ $(function () {
             location.reload();
         });
     });
-
-    $("#reload").on("click", function () {
-        location.reload();
-    })
 });

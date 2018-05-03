@@ -1,4 +1,4 @@
-.articles {
-    height: 400px;
+.articles, .comments {
+    height: 300px;
     overflow: auto;
 }
