@@ -10,24 +10,31 @@ var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines
 mongoose.Promise = Promise;
 mongoose.connect(MONGODB_URI);
 
-request("https://theguardian.com", function(error, response, html) {
+request("https://theguardian.com", function (error, response, html) {
     var $ = cheerio.load(html);
     var results = [];
-
+    var links = [];
     $("a.fc-item__link").each(function (i, element) {
-
-        var link = $(element).attr("href");
-        var kicker = $(element).children(".fc-item__kicker").text();
-        var title = $(element).children(".fc-item__headline").text();
-
-        // Save these results in an object that we'll push into the results array we defined earlier
-        results.push({
-            kicker: kicker,
-            title: title,
-            link: link
-        });
+        links.push($(element).attr("href"));
     });
-
-    console.log(results);
+    console.log(links.length);
+    scrapeArticle(links, results, 0);
 });
 
+function scrapeArticle(links, results, i) {
+    console.log(i);
+    if (i === links.length) console.log(results);
+    else {
+        request(links[i], function (error, response, html) {
+            var $ = cheerio.load(html);
+            var title = $("h1.content__headline").text();
+            var summary = $("div.content__standfirst").children("p").text();
+            results.push({
+                title: title,
+                summary: summary,
+                link: links[i]
+            });
+            scrapeArticle(links, results, i + 1);
+        });
+    }
+}
