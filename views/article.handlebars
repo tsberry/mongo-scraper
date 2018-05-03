@@ -7,3 +7,20 @@
         <a href="{{link}}">Article Link</a>
     </div>
 </div>
+{{#each comments}}
+<div class="panel panel-default">
+    <div class="panel-body">
+        {{text}}
+    </div>
+</div>
+{{/each}}
+<form id="comment-form" data-id="{{_id}}" action="">
+    <textarea id="comment-text" class="form-control">
+
+    </textarea>
+
+    <input type="submit" class="btn btn-danger" value="Add Comment">
+</form>
+
+<button id="reload">Reload</button>
+<script src="/assets/js/comment.js"></script>
