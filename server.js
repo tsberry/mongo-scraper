@@ -1,6 +1,17 @@
 var mongoose = require("mongoose");
 var request = require("request");
 var cheerio = require("cheerio");
+var express = require("express");
+var exphbs = require("express-handlebars");
+
+var app = express();
+
+app.engine('handlebars', exphbs({defaultLayout: 'main'}));
+app.set('view engine', 'handlebars');
+
+app.use(express.static("public"));
+
+var PORT = process.env.PORT || 7000;
 
 // If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
 var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
@@ -22,15 +33,24 @@ const article = new Schema({
 
 const Article = mongoose.model('Article', article);
 
-request("https://theguardian.com", function (error, response, html) {
-    var $ = cheerio.load(html);
-    // var results = [];
-    var links = [];
-    $("a.fc-item__link").each(function (i, element) {
-        links.push($(element).attr("href"));
+app.get("/", function (req, res) {
+    Article.find({}, function (error, docs) {
+        res.render("index", {docs: docs});
     });
-    console.log(links.length);
-    scrapeArticle(links, 0);
+});
+
+app.post("/api/scrape", function (req, res) {
+    request("https://theguardian.com", function (error, response, html) {
+        var $ = cheerio.load(html);
+        // var results = [];
+        var links = [];
+        $("a.fc-item__link").each(function (i, element) {
+            links.push($(element).attr("href"));
+        });
+        console.log(links.length);
+        scrapeArticle(links, 0);
+        res.end();
+    });
 });
 
 function scrapeArticle(links, i) {
@@ -60,3 +80,7 @@ function scrapeArticle(links, i) {
         });
     }
 }
+
+app.listen(PORT, function () {
+    console.log("App listening on PORT " + PORT + "!");
+});
