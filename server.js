@@ -39,6 +39,12 @@ app.get("/", function (req, res) {
     });
 });
 
+app.get("/articles/:id", function (req, res) {
+    Article.find({_id: req.params.id}, function (error, docs) {
+        res.render("article", docs[0]);
+    });
+});
+
 app.post("/api/scrape", function (req, res) {
     request("https://theguardian.com", function (error, response, html) {
         var $ = cheerio.load(html);
@@ -72,7 +78,7 @@ function scrapeArticle(links, i) {
                     newArticle.summary = summary;
                     newArticle.link = links[i];
                     newArticle.save(function (err) {
-                        if (!err) console.log("Success!");
+                        if (!err) console.log(`Success! Added ${title}`);
                     })
                     scrapeArticle(links, i + 1);
                 });

@@ -1,19 +1,13 @@
-<div class="container">
-    <div class="jumbotron">
-        <h1>Scraping the Guardian</h1>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h2 class="panel-title">Articles</h2>
     </div>
-
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h2 class="panel-title">Articles</h2>
-        </div>
-        <div class="articles panel-body">
-            {{#each docs}} {{> articles}} {{/each}}
-        </div>
+    <div class="articles panel-body">
+        {{#each docs}} {{> articles}} {{/each}}
     </div>
-
-
-    <button class="btn btn-primary" id="scraper">Scrape for New Articles</button>
 </div>
+
+
+<button class="btn btn-primary" id="scraper">Scrape for New Articles</button>
 
 <script src="/assets/js/scrape.js"></script>
